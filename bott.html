@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chat Bot</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #121212;
+        }
+
+        .chat-container {
+            width: 350px;
+            height: 80vh;
+            display: flex;
+            flex-direction: column;
+            background-color: #1e1e1e;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            color: white;
+        }
+
+        /* Header */
+        .chat-header {
+            background-color: #181818;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            border-bottom: 1px solid #2a2a2a;
+        }
+
+        .chat-header img {
+            width: 30px;
+            height: 30px;
+        }
+
+        .back-button {
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: white;
+            cursor: pointer;
+        }
+
+        .chat-box {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            scrollbar-width: thin;
+        }
+
+        .message {
+            padding: 10px 15px;
+            border-radius: 15px;
+            max-width: 75%;
+            word-wrap: break-word;
+        }
+
+        .user {
+            align-self: flex-end;
+            background-color: #333;
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+
+        .bot {
+            align-self: flex-start;
+            background-color: #444;
+            color: #ddd;
+            border-bottom-left-radius: 5px;
+        }
+
+        .input-container {
+            display: flex;
+            padding: 10px;
+            background-color: #181818;
+            border-top: 1px solid #2a2a2a;
+        }
+
+        input {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 20px;
+            background-color: #252525;
+            color: white;
+            outline: none;
+        }
+
+        button {
+            padding: 10px 15px;
+            margin-left: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="chat-container">
+        <div class="chat-header">
+            <button class="back-button">←</button>
+            <img src="download.png" alt="Bot Icon"> 
+            AI Chat Bot
+        </div>
+        
+        <div class="chat-box" id="chat-box"></div>
+
+        <div class="input-container">
+            <input type="text" id="user-input" placeholder="Type your message..." onkeypress="handleKeyPress(event)" />
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <script>
+        async function sendMessage() {
+            const userInput = document.getElementById("user-input").value.trim();
+            if (!userInput) return;
+
+            const chatBox = document.getElementById("chat-box");
+
+            // Add user message
+            chatBox.innerHTML += `<div class="message user">${userInput}</div>`;
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            document.getElementById("user-input").value = "";
+
+            // Fetch response from the API
+            try {
+                const response = await fetch("http://127.0.0.1:5000/chat", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ query: userInput })
+                });
+
+                const data = await response.json();
+
+                // Add bot response
+                chatBox.innerHTML += `<div class="message bot">${data.response}</div>`;
+                chatBox.scrollTop = chatBox.scrollHeight;
+
+            } catch (error) {
+                chatBox.innerHTML += `<div class="message bot">❌ Error connecting to server.</div>`;
+            }
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === "Enter") sendMessage();
+        }
+    </script>
+
+</body>
+</html>
